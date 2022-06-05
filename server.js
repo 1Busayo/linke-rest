@@ -106,11 +106,11 @@ try {
 
 // Retrieve all users 
 app.get('/allmimes', authenticateToken ,function (req, res) {
-  dbConn.query('SELECT * FROM mimes', function (error, results, fields) {
+  dbConn.query('SELECT * FROM users a , mime b where a.wallet_address = b.wallet_address ORDER BY b.mime_id DESC', function (error, results, fields) {
   
   try {
   
-    return res.send({ status:"", data: results, message: 'all mimes.' });
+    return res.send({ status:"success", data: results, message: 'all mimes.' });
   
   } catch (error) {
     return res.send({data:"failed"})
@@ -122,6 +122,21 @@ app.get('/allmimes', authenticateToken ,function (req, res) {
 });
 
 });
+
+
+// Retrieve user collections or mimes
+app.get('/usermimes/:id', function (req, res) {
+  let user_id = req.params.id;
+  if (!user_id) {
+  return res.status(400).send({ error: true, message: 'Please provide address' });
+  }
+  dbConn.query('SELECT * FROM users a , mime b where a.wallet_address =? and b.wallet_address =? ORDER BY b.mime_id DESC', [user_id,user_id], function (error, results, fields) {
+  if (error) throw error;
+  return res.send({ error: false, data: results, message: 'users list.' });
+  });
+  });
+
+
 
 // Retrieve user with id 
 app.get('/getuser/:id', function (req, res) {
